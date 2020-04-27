@@ -12,11 +12,13 @@ def serve():
 
         try:
             request = connection_socket.recv(1024)
+            print(request)
             file_name = request.split()[1][1:]
             output = open(file_name).read()
             # http header
             connection_socket.send("HTTP/1.1 200 OK\r\n\r\n".encode('utf-8'))
             # payload
+            print(output)
             connection_socket.send(output.encode('utf-8'))
         except IOError:
             # not found
