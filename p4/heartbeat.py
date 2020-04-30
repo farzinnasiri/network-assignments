@@ -4,8 +4,8 @@ import random
 from socket import *
 
 '''
-run the command: "python pinger.py serve" to run the server 
-run the command: "python pinger.py ping" to ping the server
+run the command: "python heartbeat.py server" to run the server 
+run the command: "python heartbeat.py client" to run the client
 
 default port number is 8000 
 '''
@@ -53,13 +53,12 @@ class Server:
     def run(self):
         server_socket = socket(AF_INET, SOCK_DGRAM)
         server_socket.bind((self.host, self.port))
-        server_socket.settimeout(10)
+        server_socket.settimeout(2)
 
         server_seq_num = 0
 
         print("Server is running on", self.host, ":", self.port)
         while True:
-            # chance = random.randint(0, 10)
             try:
                 message, addr = server_socket.recvfrom(1024)
                 _, seq_num, time_stamp = message.decode().split()
@@ -72,15 +71,18 @@ class Server:
                     if diff == 1:
                         print("Packet number", server_seq_num, " is lost")
                     else:
-                        print("Packet with numbers: ",
+                        print("Packets with numbers: ",
                               " ".join([str(packet) for packet in range(server_seq_num, seq_num)]), "are lost")
                     server_seq_num = seq_num + 1
+                    print("Packet number", server_seq_num - 1, "was delivered in", delta, "\u03BCs")
                     continue
                 if server_seq_num == seq_num:
                     print("Packet number", server_seq_num, "was delivered in", delta, "\u03BCs")
                 server_seq_num += 1
 
             except timeout:
+                if server_seq_num == 0:
+                    continue
                 print("Client has stopped working")
 
 
